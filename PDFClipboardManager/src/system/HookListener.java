@@ -70,7 +70,7 @@ public class HookListener implements NativeKeyListener {
         } else {
             normalMode = F7_RAW_CODE == event.getRawCode();
         }
-        return output;
+        return output + 1;
     }
 
     /**

@@ -35,7 +35,7 @@ public class Organizer {
     /**
      * Default output resolution of the images (in dots per inch)
      */
-    public static int DEFAULT_DPI = 300;
+    public static int DEFAULT_DPI = 150;
 
     /**
      * Images representing each page of a given pdf document
