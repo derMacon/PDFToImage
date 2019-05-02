@@ -23,11 +23,7 @@ public class Organizer {
 
     private static final int DEFAULT_WIDTH = 930;
     private static final int DEFAULT_HEIGHT = 650;
-    /**
-     * Default output directory
-     */
-    public static String OUTPUT_DIR_TEMPLATE = "%s" + File.separator + "%s_img" + File.separator;
-    public static String TEMP_FILE_TYPE = "./.tempImg";
+    public static String TEMP_FILE_TYPE = "tempImg.png";
 
     /**
      * Default output resolution of the images (in dots per inch)
@@ -45,9 +41,14 @@ public class Organizer {
      *
      * @param doc pdf document to process
      */
-    public Organizer(File doc) throws IOException {
-        this.selectedPdf = PDDocument.load(doc);
-        this.currPageImg = new File(doc.getName() + TEMP_FILE_TYPE);
+    public Organizer(File doc) {
+        try {
+            this.selectedPdf = PDDocument.load(doc);
+            this.currPageImg = new File(TEMP_FILE_TYPE);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Error: cannot load the pdf document [" + doc.getName() + "]");
+        }
     }
 
     /**
@@ -69,15 +70,21 @@ public class Organizer {
             }
             return true;
         } else {
-            System.out.println("Error: Page number out of bound");
+//            System.out.println("Error: Page number out of bound");
             return false;
         }
     }
 
+    /**
+     * Renders an image of the given page given that the page is actually existent in the underlying pdf document
+     * @param pageNum page num which the user selected (page to copy to the clipboard)
+     * @return an cliboard image which can be saved in the systems clipboard
+     * @throws IOException Exception that will be thrown if the selected pdf document cannot be read
+     */
     private ClipboardImage renderImageInTemp(Integer pageNum) throws IOException {
         PDFRenderer pdfRenderer = new PDFRenderer(this.selectedPdf);
         BufferedImage bim = pdfRenderer.renderImageWithDPI(pageNum, DEFAULT_DPI, ImageType.RGB);
-        ImageIOUtil.writeImage(bim, this.currPageImg.getName(), DEFAULT_DPI);
+        ImageIOUtil.writeImage(bim, this.currPageImg.getPath(), DEFAULT_DPI);
         ImageResizer.resizeImage(this.currPageImg.getPath(), this.currPageImg.getPath(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
         ImageIcon icon = new ImageIcon(this.currPageImg.getPath());

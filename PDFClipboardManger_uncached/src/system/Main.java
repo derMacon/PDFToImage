@@ -17,6 +17,9 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Main method calling all the methods and starting the application.
+ */
 public class Main extends Application {
 
     private static final String EXIT_KEYWORD = "exit";
@@ -42,22 +45,13 @@ public class Main extends Application {
         Scanner scanner = new Scanner(System.in);
         System.out.println(HISTORY.getPath());
         refreshSelectedFile(primaryStage);
-
         System.out.println("PDFClipboardManager: " + this.selectedPdf);
 
         HookRunner runner = new HookRunner(this.selectedPdf);
         Thread thread = new Thread(runner);
         thread.start();
 
-        String userInput = null;
-        while (this.selectedPdf != null && !EXIT_KEYWORD.equals(userInput)) {
-            System.out.print(USAGE + "user input: ");
-            userInput = scanner.next().toLowerCase();
-            if(userInput.equals(IMPORT_KEYWORD)) {
-                startFileChooser(primaryStage);
-            }
-        }
-
+        listenToTerminalInput(scanner, primaryStage);
         runner.stop();
         thread.join();
         setHistoryFile();
@@ -83,23 +77,25 @@ public class Main extends Application {
     }
 
     /**
-     * Writes the current selected pdf document into the history file to load up instantly next time the programm
-     * will be started.
+     * Starts up the initial file chooser to select a pdf document that should be processed
+     * @param primaryStage stage to show the file chooser on
      */
-    private void setHistoryFile() {
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(HISTORY));
-            writer.write(this.selectedPdf.getPath());
-
-            writer.close();
-        } catch (IOException e) {
-            System.out.println("Could not write the history file");
-            e.printStackTrace();
+    private void startFileChooser(Stage primaryStage) {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
+        fileChooser.setInitialDirectory(new File(DEFAULT_DIR_FC));
+        File file = fileChooser.showOpenDialog(primaryStage);
+        if (file != null) {
+            System.out.println("User selected file: " + file.getName());
+            selectedPdf = file;
+        } else {
+            System.out.println("User has not selected a valid pdf document, program terminated.");
+            System.exit(0);
         }
+        primaryStage.setTitle("Choose Pdf-Document");
     }
 
-
-    /**
+    /*
      * Reads the HISTORY .txt file which contains only one path to the pdf-document which was opened the last time
      * the program was running.
      */
@@ -118,22 +114,38 @@ public class Main extends Application {
     }
 
     /**
-     * Starts up the initial file chooser to select a pdf document that should be processed
-     * @param primaryStage stage to show the file chooser on
+     * Listens to the terminal input via the given scanner instance. The user has the choice to select a new pdf file
+     * or terminate the running programm completely
+     * @param scanner scanner instance which will be used to listen to the user input from the terminal
+     * @param primaryStage stage to display the filechooser if needed
      */
-    private void startFileChooser(Stage primaryStage) {
-        final FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-        fileChooser.setInitialDirectory(new File(DEFAULT_DIR_FC));
-        File file = fileChooser.showOpenDialog(primaryStage);
-        if (file != null) {
-            System.out.println("User selected file: " + file.getName());
-            selectedPdf = file;
-        } else {
-            System.out.println("User has not selected a valid pdf document, program terminated.");
-            System.exit(0);
+    private void listenToTerminalInput(Scanner scanner, Stage primaryStage) {
+        String userInput = null;
+        while (this.selectedPdf != null && !EXIT_KEYWORD.equals(userInput)) {
+            System.out.print(USAGE + "user input: ");
+            userInput = scanner.next().toLowerCase();
+            if(userInput.equals(IMPORT_KEYWORD)) {
+                startFileChooser(primaryStage);
+            }
         }
-        primaryStage.setTitle("Choose Pdf-Document");
     }
+
+    /**
+     * Writes the current selected pdf document into the history file to load up instantly next time the programm
+     * will be started.
+     */
+    private void setHistoryFile() {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(HISTORY));
+            writer.write(this.selectedPdf.getPath());
+
+            System.out.println(this.selectedPdf.getPath());
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Could not write the history file");
+            e.printStackTrace();
+        }
+    }
+
 }
 

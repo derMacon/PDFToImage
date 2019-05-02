@@ -27,17 +27,11 @@ public class HookRunner implements Runnable {
     }
 
     /**
-     * Sets the flag appropriately so that the thread will be terminated
-     */
-    public void stop() {
-        this.running = false;
-    }
-
-    /**
      * Initializes the native hook listener to make it possible to listen for the key combinations to load up the
      * clipboard with an image.
      */
     private void initListener() throws NativeHookException {
+        // turn of all notifications about which keys were pressed
         Logger l = Logger.getLogger(GlobalScreen.class.getPackage().getName());
         l.setLevel(Level.OFF);
 
@@ -53,5 +47,13 @@ public class HookRunner implements Runnable {
         }
         GlobalScreen.unregisterNativeHook();
     }
+
+    /**
+     * Sets the flag appropriately so that the thread will be terminated
+     */
+    public void stop() {
+        this.running = false;
+    }
+
 
 }

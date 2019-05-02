@@ -47,7 +47,7 @@ public class HookListener implements NativeKeyListener {
      */
     @Override
     public void nativeKeyPressed(NativeKeyEvent event) {
-        Integer pageNum = translateToPageNum(event);
+        Integer pageNum = translateToPageIdx(event);
         boolean successfulCopy = this.organizer.copyToClipboard(pageNum);
         printState(pageNum, successfulCopy);
     }
@@ -57,13 +57,14 @@ public class HookListener implements NativeKeyListener {
      * @param event event triggered by the system wide hook
      * @return Page number that should be copied.
      */
-    private Integer translateToPageNum(NativeKeyEvent event) {
+    private Integer translateToPageIdx(NativeKeyEvent event) {
         Integer output = null;
         if (normalMode) {
             if (isNum(event)) {
                 userInput.append(event.getRawCode() - ZERO_RAW_CODE);
             } else {
                 output = Integer.parseInt(this.userInput.toString());
+                output--; // to make an index out of the page number
                 this.normalMode = false;
                 userInput = new StringBuilder();
             }
@@ -93,7 +94,7 @@ public class HookListener implements NativeKeyListener {
      */
     private void printState(Integer pageNum, boolean copiedToClipboard) {
         if (null != pageNum && copiedToClipboard) {
-            System.out.println("Page " + pageNum + " copied to the clipboard. Puffer cleared.");
+            System.out.print("Page " + pageNum + " copied to the clipboard. Puffer cleared.\n\nuser input: ");
         } else if (null != pageNum && !copiedToClipboard) {
             System.out.println("Error: Page " + pageNum + " cannot be copied to clipboard.");
         } else if (normalMode && this.userInput.length() == 0) {

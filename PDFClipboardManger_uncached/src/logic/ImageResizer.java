@@ -71,6 +71,7 @@ public class ImageResizer {
 
 		} catch (IOException ex) {
             ex.printStackTrace();
+			System.out.println("Cannot read file: " + sourceImg + " - " + destImg);
 		}
 
 		return true;
