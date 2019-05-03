@@ -89,14 +89,14 @@ public class HookListener implements NativeKeyListener {
     /**
      * Prints the current state of the system.
      *
-     * @param pageNum           Page number that should be copied to the clipboard
+     * @param pageIdx           Page number that should be copied to the clipboard
      * @param copiedToClipboard flag determining if the copy process to the clipboard was successful or not.
      */
-    private void printState(Integer pageNum, boolean copiedToClipboard) {
-        if (null != pageNum && copiedToClipboard) {
-            System.out.print("Page " + pageNum + " copied to the clipboard. Puffer cleared.\n\nuser input: ");
-        } else if (null != pageNum && !copiedToClipboard) {
-            System.out.println("Error: Page " + pageNum + " cannot be copied to clipboard.");
+    private void printState(Integer pageIdx, boolean copiedToClipboard) {
+        if (null != pageIdx && copiedToClipboard) {
+            System.out.print("Page " + (pageIdx + 1) + " copied to the clipboard. Puffer cleared.\n\nuser input: ");
+        } else if (null != pageIdx && !copiedToClipboard) {
+            System.out.println("Error: Page " + (pageIdx + 1) + " cannot be copied to clipboard.");
         } else if (normalMode && this.userInput.length() == 0) {
             System.out.println("User entered normal mode");
         } else if (this.normalMode && this.userInput.length() > 0) {
