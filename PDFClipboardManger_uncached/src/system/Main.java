@@ -3,8 +3,6 @@ package system;
 import javafx.application.Application;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.jnativehook.GlobalScreen;
-import org.jnativehook.NativeHookException;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,8 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Main method calling all the methods and starting the application.
@@ -28,9 +24,12 @@ public class Main extends Application {
     private static final String USAGE = "usage\n" +
             "\t- EXIT to exit the program\n" +
             "\t- IMP  to import a new pdf file\n";
-    private static final File HISTORY = new File("./.history");
+    public static final String HISTORY_FILE_DIR = "history";
+
+    private static final File HISTORY = new File("./" + HISTORY_FILE_DIR + "/.history");
 
     private File selectedPdf;
+    private String fc_openingDir;
 
     /**
      * Main method calling the file chooser
@@ -71,6 +70,7 @@ public class Main extends Application {
                     + "\n2. select a new one\nuser input: ");
             userInput = scanner.next().toLowerCase();
         }
+
         if(null == userInput || userInput.equals("2") || userInput.equals("2.")) {
             startFileChooser(primaryStage);
         }
@@ -83,7 +83,8 @@ public class Main extends Application {
     private void startFileChooser(Stage primaryStage) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-        fileChooser.setInitialDirectory(new File(DEFAULT_DIR_FC));
+        File historyParentDir = new File(new File(this.fc_openingDir).getParent());
+        fileChooser.setInitialDirectory(historyParentDir);
         File file = fileChooser.showOpenDialog(primaryStage);
         if (file != null) {
             System.out.println("User selected file: " + file.getName());
@@ -103,7 +104,9 @@ public class Main extends Application {
         BufferedReader brTest = null;
         try {
             brTest = new BufferedReader(new FileReader(HISTORY));
-            this.selectedPdf = new File(brTest.readLine());
+            String line = brTest.readLine();
+            this.selectedPdf = new File(line);
+            this.fc_openingDir = line;
         } catch (FileNotFoundException e) {
             System.out.println("Could not read history file");
             e.printStackTrace();

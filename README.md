@@ -11,5 +11,5 @@ The prgram will be useful when working with anki droid so that you don't have to
 * Pdf box Framework - Apache: https://pdfbox.apache.org/
 
 ### Todo
-* Review the resizing method -> seems a bit odd
+* Implement option to reset the cache in the main method / class
 

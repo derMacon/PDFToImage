@@ -13,8 +13,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+
+import static system.Main.HISTORY_FILE_DIR;
 
 /**
  * Class to process the commands given by the user.
@@ -23,7 +23,8 @@ public class Organizer {
 
     private static final int DEFAULT_WIDTH = 930;
     private static final int DEFAULT_HEIGHT = 650;
-    public static String FILE_TEMPLATE = "tempImg%s.png";
+
+    public static String FILE_TEMPLATE = HISTORY_FILE_DIR + "/tempImg%s.png";
 
     /**
      * Default output resolution of the images (in dots per inch)
@@ -44,6 +45,7 @@ public class Organizer {
     public Organizer(File doc) {
         try {
             this.selectedPdf = PDDocument.load(doc);
+            new File(HISTORY_FILE_DIR).mkdir();
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error: cannot load the pdf document [" + doc.getName() + "]");
@@ -60,7 +62,7 @@ public class Organizer {
         assert null != this.selectedPdf;
         if (null != pageIdx && 0 <= pageIdx && this.selectedPdf.getNumberOfPages() > pageIdx) {
             try {
-                ClipboardImage clipboardImage  = renderImageInTemp(pageIdx);
+                ClipboardImage clipboardImage = loadImage(pageIdx);
                 Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                 clipboard.setContents(clipboardImage, clipboardImage);
             } catch (IOException e) {
@@ -74,20 +76,38 @@ public class Organizer {
     }
 
     /**
+     * Loads up an image from:
+     * - the cached history
+     * - the pdf document if the file was not already generated
+     *
+     * @param pageIdx index of the page that should be loaded / returned
+     * @return an image corresponding to the given page index
+     * @throws IOException Exception that will be thrown if the given page index is out of bound
+     */
+    private ClipboardImage loadImage(Integer pageIdx) throws IOException {
+        File historyDir = new File(HISTORY_FILE_DIR);
+        File currPage = new File(String.format(HISTORY_FILE_DIR, pageIdx));
+        if (!historyDir.exists() || !historyDir.isDirectory()
+                || !Arrays.asList(historyDir.listFiles()).contains(currPage)) {
+            renderImageInTemp(pageIdx);
+        }
+        ImageIcon icon = new ImageIcon(this.currPageImg.getPath());
+        return new ClipboardImage(icon.getImage());
+    }
+
+    /**
      * Renders an image of the given page given that the page is actually existent in the underlying pdf document
+     *
      * @param pageNum page num which the user selected (page to copy to the clipboard)
      * @return an cliboard image which can be saved in the systems clipboard
      * @throws IOException Exception that will be thrown if the selected pdf document cannot be read
      */
-    private ClipboardImage renderImageInTemp(Integer pageNum) throws IOException {
+    private void renderImageInTemp(Integer pageNum) throws IOException {
         PDFRenderer pdfRenderer = new PDFRenderer(this.selectedPdf);
         BufferedImage bim = pdfRenderer.renderImageWithDPI(pageNum, DEFAULT_DPI, ImageType.RGB);
         this.currPageImg = new File(String.format(FILE_TEMPLATE, pageNum.toString()));
         ImageIOUtil.writeImage(bim, this.currPageImg.getPath(), DEFAULT_DPI);
         ImageResizer.resizeImage(this.currPageImg.getPath(), this.currPageImg.getPath(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
-
-        ImageIcon icon = new ImageIcon(this.currPageImg.getPath());
-        return new ClipboardImage(icon.getImage());
     }
 
 }
