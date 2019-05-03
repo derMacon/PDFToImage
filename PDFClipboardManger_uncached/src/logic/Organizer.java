@@ -24,6 +24,7 @@ public class Organizer {
     private static final int DEFAULT_WIDTH = 930;
     private static final int DEFAULT_HEIGHT = 650;
     public static String TEMP_FILE_TYPE = "tempImg.png";
+    public static String FILE_TEMPLATE = "tempImg%s.png";
 
     /**
      * Default output resolution of the images (in dots per inch)
@@ -70,7 +71,6 @@ public class Organizer {
             }
             return true;
         } else {
-//            System.out.println("Error: Page number out of bound");
             return false;
         }
     }
@@ -84,6 +84,8 @@ public class Organizer {
     private ClipboardImage renderImageInTemp(Integer pageNum) throws IOException {
         PDFRenderer pdfRenderer = new PDFRenderer(this.selectedPdf);
         BufferedImage bim = pdfRenderer.renderImageWithDPI(pageNum, DEFAULT_DPI, ImageType.RGB);
+//        System.out.println(String.format(FILE_TEMPLATE, pageNum));
+        this.currPageImg = new File(String.format(FILE_TEMPLATE, pageNum.toString()));
         ImageIOUtil.writeImage(bim, this.currPageImg.getPath(), DEFAULT_DPI);
         ImageResizer.resizeImage(this.currPageImg.getPath(), this.currPageImg.getPath(), DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
