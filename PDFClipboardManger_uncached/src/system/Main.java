@@ -42,7 +42,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scanner scanner = new Scanner(System.in);
-        System.out.println(HISTORY.getPath());
         refreshSelectedFile(primaryStage);
         System.out.println("PDFClipboardManager: " + this.selectedPdf);
 
@@ -83,7 +82,7 @@ public class Main extends Application {
     private void startFileChooser(Stage primaryStage) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF", "*.pdf"));
-        File historyParentDir = new File(new File(this.fc_openingDir).getParent());
+        File historyParentDir = createOpeningDir();
         fileChooser.setInitialDirectory(historyParentDir);
         File file = fileChooser.showOpenDialog(primaryStage);
         if (file != null) {
@@ -94,6 +93,18 @@ public class Main extends Application {
             System.exit(0);
         }
         primaryStage.setTitle("Choose Pdf-Document");
+    }
+
+    /**
+     * If the the opening directory for the file chooser is not defined the
+     * default directory will be returned otherwise the parent directory of
+     * the given file chooser file will be selected.
+     * @return initial directory of the file
+     */
+    private File createOpeningDir() {
+        String path = null == this.fc_openingDir ? DEFAULT_DIR_FC :
+                new File(this.fc_openingDir).getParent();
+        return new File(path);
     }
 
     /*
